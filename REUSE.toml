@@ -19,6 +19,7 @@ path = [
     "tests/**",
     "src/**",
     ".github/**",
+    "swift-ffi-demo/**",
     "AGENTS.md",
     "Cargo.lock",
     "Cargo.toml",

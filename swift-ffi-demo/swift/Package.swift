@@ -10,7 +10,7 @@ let package = Package(
     ],
     targets: [
         // C declarations for the Rust library. build.sh generates the header and stages
-        // libgreeter.a in .rust-lib/, which is added to the linker search path here.
+        // the Rust static library in .rust-lib/, which is added to the linker search path here.
         .systemLibrary(name: "greeterFFI", path: "Sources/greeterFFI"),
         .target(
             name: "Greeter",

@@ -2,6 +2,8 @@
 name = "greeter"
 version = "0.1.0"
 edition = "2024"
+# The lowest Rust that builds the locked dependencies.
+rust-version = "1.91"
 publish = false
 description = "A tiny Rust library exposed to Swift through UniFFI"
 

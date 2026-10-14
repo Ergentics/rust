@@ -1,8 +1,9 @@
 # Swift FFI demo
 
 A small Rust library called from Swift. It lives in this fork of the Rust compiler as a
-self-contained example and does not touch the compiler: `rust/` is its own Cargo workspace, and
-nothing in the repository's build refers to this directory.
+self-contained example that the compiler build never uses: `rust/` is its own Cargo workspace.
+Outside this directory there is only its workflow and an entry in `REUSE.toml`, so the
+repository's license check covers these files.
 
 ```
 rust/    Rust crate `greeter`, plus the `uniffi-bindgen` tool that generates the Swift bindings
@@ -30,7 +31,7 @@ later generate Kotlin or Python bindings too.
 
 ## Build and run
 
-Needs Swift 6.2 or later and a Rust toolchain (`rustup`). On Linux, Cargo also needs a C
+Needs Swift 6.2 or later and Rust 1.91 or later (`rustup`). On Linux, Cargo also needs a C
 linker (`cc`).
 
 ```sh
@@ -40,9 +41,11 @@ swift test
 swift run greeter-demo
 ```
 
-`build.sh` copies the static library `libgreeter.a` into `swift/.rust-lib/`, which
-`Package.swift` adds to the linker search path. The generated files are not committed; rerun
+`build.sh` copies the static library into `swift/.rust-lib/` as `libgreeter_rs.a`, which
+`Package.swift` adds to the linker search path. The `_rs` suffix matters on macOS: Swift Build
+also writes a `libGreeter.a` for the Swift library, and a case-insensitive file system would let
+`-lgreeter` pick that file up instead. The generated files are not committed; rerun
 `build.sh` after changing the Rust code.
 
 CI for this directory is `.github/workflows/swift-ffi-demo.yml`: Linux with Swift 6.2 and 6.4,
-and macOS.
+and macOS, which also builds with Swift Build, the default build system from Swift 6.4.

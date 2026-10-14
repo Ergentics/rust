@@ -95,3 +95,8 @@ jobs:
       - name: Run demo
         working-directory: swift-ffi-demo/swift
         run: swift run greeter-demo
+      - name: Build Swift with Swift Build
+        # Swift Build is the default build system from Swift 6.4. Linking under it on macOS, whose
+        # file system is case-insensitive, catches library name clashes.
+        working-directory: swift-ffi-demo/swift
+        run: swift build --build-system swiftbuild --build-tests
