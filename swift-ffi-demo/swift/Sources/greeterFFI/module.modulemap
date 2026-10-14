@@ -1,0 +1,10 @@
+// Clang module for the C header that uniffi-bindgen generates (build.sh copies it here).
+// `link` makes anything importing this module link the Rust static library, libgreeter.a.
+module greeterFFI {
+    header "greeterFFI.h"
+    link "greeter"
+    export *
+    use "Darwin"
+    use "_Builtin_stdbool"
+    use "_Builtin_stdint"
+}

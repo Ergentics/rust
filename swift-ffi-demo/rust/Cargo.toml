@@ -1,0 +1,20 @@
+[package]
+name = "greeter"
+version = "0.1.0"
+edition = "2024"
+publish = false
+description = "A tiny Rust library exposed to Swift through UniFFI"
+
+# Keep this crate out of the compiler's workspace in the repository root.
+[workspace]
+
+[lib]
+# `cdylib` is what uniffi-bindgen reads the interface from; Swift links the `staticlib`.
+crate-type = ["lib", "cdylib", "staticlib"]
+
+[[bin]]
+name = "uniffi-bindgen"
+path = "src/bin/uniffi-bindgen.rs"
+
+[dependencies]
+uniffi = { version = "0.32.2", features = ["cli"] }
