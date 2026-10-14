@@ -1,0 +1,102 @@
+# Builds and tests swift-ffi-demo/: a Rust library that Swift calls through UniFFI.
+# Separate from the compiler's own CI; it only runs when the demo changes.
+name: Swift FFI demo
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - swift-ffi-demo/**
+      - .github/workflows/swift-ffi-demo.yml
+  pull_request:
+    paths:
+      - swift-ffi-demo/**
+      - .github/workflows/swift-ffi-demo.yml
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+defaults:
+  run:
+    shell: bash
+    working-directory: swift-ffi-demo
+
+jobs:
+  linux:
+    name: Linux (Swift ${{ matrix.swift }})
+    runs-on: ubuntu-24.04
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          # Official Swift images, pinned by digest. 6.2 is the minimum the package supports.
+          - swift: "6.2"
+            image: swift:6.2@sha256:eccc7a97f9b9881d9659e2e788081fd7675f86d39793b51200bfb178398b3784
+          - swift: "6.4"
+            image: swift:6.4@sha256:870edbd7f37b77dc01ebab7eb4e0475d16be82796a06734d0bdc010cd24ea32f
+    container: ${{ matrix.image }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - name: Install Rust
+        # The Swift images have no curl, and no `cc` for Cargo to link with.
+        run: |
+          apt-get update -qq
+          apt-get install -y -qq --no-install-recommends ca-certificates curl gcc
+          curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y --profile minimal
+          echo "$HOME/.cargo/bin" >> "$GITHUB_PATH"
+      - name: Toolchains
+        run: |
+          swift --version
+          cargo --version
+      - name: Test Rust
+        run: cargo test --manifest-path rust/Cargo.toml --locked
+      - name: Build Rust and generate Swift bindings
+        run: ./build.sh
+      - name: Build Swift
+        working-directory: swift-ffi-demo/swift
+        run: swift build
+      - name: Test Swift
+        working-directory: swift-ffi-demo/swift
+        run: swift test
+      - name: Run demo
+        working-directory: swift-ffi-demo/swift
+        run: swift run greeter-demo
+
+  macos:
+    name: macOS
+    runs-on: macos-26
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - name: Install Rust
+        run: |
+          if ! command -v rustup >/dev/null; then
+            curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y --profile minimal
+            echo "$HOME/.cargo/bin" >> "$GITHUB_PATH"
+          fi
+      - name: Toolchains
+        run: |
+          swift --version
+          cargo --version
+      - name: Test Rust
+        run: cargo test --manifest-path rust/Cargo.toml --locked
+      - name: Build Rust and generate Swift bindings
+        run: ./build.sh
+      - name: Build Swift
+        working-directory: swift-ffi-demo/swift
+        run: swift build
+      - name: Test Swift
+        working-directory: swift-ffi-demo/swift
+        run: swift test
+      - name: Run demo
+        working-directory: swift-ffi-demo/swift
+        run: swift run greeter-demo
+      - name: Build Swift with Swift Build
+        # Swift Build is the default build system from Swift 6.4. Linking under it on macOS, whose
+        # file system is case-insensitive, catches library name clashes.
+        working-directory: swift-ffi-demo/swift
+        run: swift build --build-system swiftbuild --build-tests
