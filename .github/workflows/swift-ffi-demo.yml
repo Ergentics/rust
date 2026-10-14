@@ -41,7 +41,7 @@ jobs:
             image: swift:6.4@sha256:870edbd7f37b77dc01ebab7eb4e0475d16be82796a06734d0bdc010cd24ea32f
     container: ${{ matrix.image }}
     steps:
-      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v6
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
       - name: Install Rust
         # The Swift images have no curl, and no `cc` for Cargo to link with.
         run: |
@@ -71,7 +71,7 @@ jobs:
     name: macOS
     runs-on: macos-26
     steps:
-      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v6
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
       - name: Install Rust
         run: |
           if ! command -v rustup >/dev/null; then
